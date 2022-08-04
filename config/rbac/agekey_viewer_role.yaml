@@ -1,0 +1,20 @@
+# permissions for end users to view agekeys.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: agekey-viewer-role
+rules:
+- apiGroups:
+  - gitopssecret.snappcloud.io
+  resources:
+  - agekeys
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - gitopssecret.snappcloud.io
+  resources:
+  - agekeys/status
+  verbs:
+  - get

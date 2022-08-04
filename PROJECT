@@ -1,0 +1,31 @@
+domain: gitopssecret.snappcloud.io
+layout:
+- go.kubebuilder.io/v3
+projectName: gitops-secret-manager
+repo: github.com/snapp-incubator/age-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: gitopssecret.snappcloud.io
+  kind: AgeKey
+  path: github.com/snapp-incubator/age-operator/api/v1alpha1
+  version: v1alpha1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: gitopssecret.snappcloud.io
+  kind: AgeSecret
+  path: github.com/snapp-incubator/age-operator/api/v1alpha1
+  version: v1alpha1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
+version: "3"

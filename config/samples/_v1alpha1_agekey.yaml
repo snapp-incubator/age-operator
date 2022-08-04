@@ -1,0 +1,7 @@
+apiVersion: gitopssecret.snappcloud.io/v1alpha1
+kind: AgeKey
+metadata:
+  name: agekey-sample
+  namespace: default
+spec:
+  age_secret_key: "AGE-SECRET-KEY-1H75QW77QX00PN9EKJHCR6XFYTA9DCFWMDMHZR5H5T6VLWVKSA8TQGWSJYH"
