@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	AgeKeysRootPath = "keys/"
+	AgeKeysRootPath = "/tmp/keys/"
 )
 
 func finalizeAgeKey(ageKey *v1alpha1.AgeKey) error {
