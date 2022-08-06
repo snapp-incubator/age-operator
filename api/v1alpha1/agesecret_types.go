@@ -25,7 +25,8 @@ type AgeSecretSpec struct {
 	// +kubebuilder:validation:Required
 	AgeKeyRef  string `json:"age_key_ref"`
 	StringData string `json:"stringData"`
-	Suspend    bool   `json:"suspend"`
+	// +kubebuilder:validation:Optional
+	Suspend bool `json:"suspend"`
 }
 
 // AgeSecretStatus defines the observed state of AgeSecret

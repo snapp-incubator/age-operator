@@ -6,6 +6,7 @@ import (
 	"filippo.io/age"
 	"filippo.io/age/armor"
 	"github.com/snapp-incubator/age-operator/api/v1alpha1"
+	"github.com/snapp-incubator/age-operator/lang"
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
@@ -62,22 +63,35 @@ func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secre
 		if errors.IsNotFound(err) {
 			errCreateChildSecret := k8sclient.Create(context.Background(), secret)
 			if errCreateChildSecret != nil {
-				ageSecret.Status.Health = "UNHEALTHY"
+				ageSecret.Status.Health = lang.AgeSecretStatusUnhealthy
 				ageSecret.Status.Message = "could not create child secret"
 				_ = k8sclient.Update(context.Background(), ageSecret)
 				return errCreateChildSecret
 			}
+			ageSecret.Status.Health = lang.AgeSecretStatusHealthy
+			_ = k8sclient.Update(context.Background(), ageSecret)
 			return nil
 		}
+		ageSecret.Status.Health = lang.AgeSecretStatusUnhealthy
+		ageSecret.Status.Message = "could not fetch child secret"
+		_ = k8sclient.Update(context.Background(), ageSecret)
 		return err
 	}
 
-	if !apiequality.Semantic.DeepEqual(secretToLoad, ageSecret) {
+	if !apiequality.Semantic.DeepEqual(secretToLoad, secret) {
+		logger := NewLogger(ageSecret.GetNamespace(), ageSecret.GetName())
+		logger.Info("child secret exists but needs to get refreshed")
 		err = k8sclient.Update(context.Background(), ageSecret)
 		if err != nil {
+			logger.Error(err, "could not refresh child secret")
+			ageSecret.Status.Health = lang.AgeSecretStatusUnhealthy
+			ageSecret.Status.Message = "could not refresh child secret"
+			_ = k8sclient.Update(context.Background(), ageSecret)
 			return err
 		}
 	}
+	ageSecret.Status.Health = lang.AgeSecretStatusHealthy
+	_ = k8sclient.Update(context.Background(), ageSecret)
 	return nil
 }
 
