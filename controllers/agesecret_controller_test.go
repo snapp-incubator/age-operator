@@ -5,12 +5,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/snapp-incubator/age-operator/api/v1alpha1"
-	"io/ioutil"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
+	"os"
 	"path/filepath"
 	"time"
 )
@@ -33,7 +33,7 @@ var _ = Describe("", func() {
 	}
 
 	BeforeEach(func() {
-		content, err := ioutil.ReadFile(fooValidAgeKeyPath2)
+		content, err := os.ReadFile(fooValidAgeKeyPath2)
 		Expect(err).Should(BeNil())
 
 		obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(content, nil, nil)
@@ -42,7 +42,7 @@ var _ = Describe("", func() {
 	})
 
 	BeforeEach(func() {
-		content, err := ioutil.ReadFile(fooValidAgeKeyPath3)
+		content, err := os.ReadFile(fooValidAgeKeyPath3)
 		Expect(err).Should(BeNil())
 
 		obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(content, nil, nil)
@@ -51,7 +51,7 @@ var _ = Describe("", func() {
 	})
 
 	BeforeEach(func() {
-		content, err := ioutil.ReadFile(fooValidAgeSecretPath)
+		content, err := os.ReadFile(fooValidAgeSecretPath)
 		Expect(err).Should(BeNil())
 
 		obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(content, nil, nil)

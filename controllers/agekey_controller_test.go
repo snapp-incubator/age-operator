@@ -6,7 +6,6 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/snapp-incubator/age-operator/api/v1alpha1"
 	"github.com/snapp-incubator/age-operator/k8sutils"
-	"io/ioutil"
 	"k8s.io/client-go/kubernetes/scheme"
 	"os"
 	"path/filepath"
@@ -24,7 +23,7 @@ var _ = Describe("Testing AgeKey", func() {
 	invalidAgeKeyObj := &v1alpha1.AgeKey{}
 
 	BeforeEach(func() {
-		content, err := ioutil.ReadFile(fooValidAgeKeyPath)
+		content, err := os.ReadFile(fooValidAgeKeyPath)
 		Expect(err).Should(BeNil())
 
 		obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(content, nil, nil)
@@ -33,7 +32,7 @@ var _ = Describe("Testing AgeKey", func() {
 	})
 
 	BeforeEach(func() {
-		content, err := ioutil.ReadFile(fooInvalidAgeKeyPath)
+		content, err := os.ReadFile(fooInvalidAgeKeyPath)
 		Expect(err).Should(BeNil())
 
 		obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(content, nil, nil)
