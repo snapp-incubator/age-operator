@@ -39,7 +39,7 @@ var _ = Describe("", func() {
 	})
 
 	Context("When creating AgeSecret", func() {
-		It("should fail if age_key_ref is empty", func() {
+		It("should fail if ageKeyRef is empty", func() {
 			fooAgeSecret := &AgeSecret{
 				TypeMeta:   fooAgeSecretMeta.TypeMeta,
 				ObjectMeta: fooAgeSecretMeta.ObjectMeta,

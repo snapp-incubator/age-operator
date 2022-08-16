@@ -33,7 +33,7 @@ func finalizeAgeKey(ageKey *v1alpha1.AgeKey) error {
 }
 
 func CreateAgeKeyFile(ageKey *v1alpha1.AgeKey) error {
-	logger := finalizerLogger(ageKey.GetNamespace(), ageKey.GetName())
+	logger := NewLogger(ageKey.GetNamespace(), ageKey.GetName())
 	fullPath := GenerateAgeKeyFullPath(ageKey)
 	if _, err := os.Stat(fullPath); err != nil {
 		if os.IsNotExist(err) {
@@ -75,12 +75,12 @@ func writeAgeKeyToFile(fullPath string, ageKey *v1alpha1.AgeKey) error {
 }
 
 func ValidateAgeKey(ageKey *v1alpha1.AgeKey, k8sclient client.Client) error {
-	logger := finalizerLogger(ageKey.GetNamespace(), ageKey.GetName())
+	logger := NewLogger(ageKey.GetNamespace(), ageKey.GetName())
 	if _, err := age.ParseX25519Identity(ageKey.Spec.AgeSecretKey); err != nil {
 		logger.Error(err, "invalid agekey on reconcile")
 		ageKey.Status.Message = "Invalid AgeKey"
 		_ = k8sclient.Update(context.Background(), ageKey)
-		return fmt.Errorf("invalid AgeKey on field .Spec.age_secret_key")
+		return fmt.Errorf("invalid AgeKey on field .Spec.ageSecretKey")
 	}
 	return nil
 }
@@ -91,4 +91,9 @@ func GenerateAgeKeyFullPath(ageKey *v1alpha1.AgeKey) string {
 
 func GenerateAgeKeyParentDir(ageKey *v1alpha1.AgeKey) string {
 	return filepath.Join(AgeKeysRootPath, ageKey.GetNamespace())
+}
+
+func UpdateAgeKeyStatus(ageKey *v1alpha1.AgeKey, k8sclient client.Client, msg string) error {
+	ageKey.Status.Message = msg
+	return k8sclient.Update(context.Background(), ageKey)
 }

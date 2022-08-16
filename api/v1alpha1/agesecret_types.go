@@ -23,7 +23,7 @@ import (
 // AgeSecretSpec defines the desired state of AgeSecret
 type AgeSecretSpec struct {
 	// +kubebuilder:validation:Required
-	AgeKeyRef  string `json:"age_key_ref"`
+	AgeKeyRef  string `json:"ageKeyRef"`
 	StringData string `json:"stringData"`
 	// +kubebuilder:validation:Optional
 	Suspend bool `json:"suspend"`

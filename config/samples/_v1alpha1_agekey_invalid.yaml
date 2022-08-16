@@ -4,4 +4,4 @@ metadata:
   name: invalid-agekey-sample
   namespace: default
 spec:
-  age_secret_key: "AGE-SECRET-Kqwewqeasd"
+  ageSecretKey: "AGE-SECRET-Kqwewqeasd"

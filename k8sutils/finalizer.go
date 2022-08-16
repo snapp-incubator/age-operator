@@ -31,6 +31,7 @@ func HandleAgeKeyFinalizers(ageKey *v1alpha1.AgeKey, k8sclient client.Client) er
 		logger := finalizerLogger(ageKey.GetNamespace(), AgeKeyFinalizer)
 		if controllerutil.ContainsFinalizer(ageKey, AgeKeyFinalizer) {
 			if err := finalizeAgeKey(ageKey); err != nil {
+				logger.Error(err, "Could not execute finalizer")
 				return err
 			}
 			controllerutil.RemoveFinalizer(ageKey, AgeKeyFinalizer)

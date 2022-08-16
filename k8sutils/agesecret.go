@@ -153,3 +153,9 @@ func cloneMap(oldMap map[string]string) map[string]string {
 
 	return newMap
 }
+
+func UpdateAgeSecretStatus(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client, health, msg string) error {
+	ageSecret.Status.Health = health
+	ageSecret.Status.Message = msg
+	return k8sclient.Update(context.Background(), ageSecret)
+}

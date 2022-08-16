@@ -23,7 +23,7 @@ import (
 // AgeKeySpec defines the desired state of AgeKey
 type AgeKeySpec struct {
 	// +kubebuilder:validation:Required
-	AgeSecretKey string `json:"age_secret_key"`
+	AgeSecretKey string `json:"ageSecretKey"`
 }
 
 // AgeKeyStatus defines the observed state of AgeKey
