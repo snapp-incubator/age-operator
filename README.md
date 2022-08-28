@@ -255,6 +255,12 @@ make install
 make run
 ```
 
+And in case you don't want to enable webhook in local, run command below and comment [WEBHOOK] sections in config/crd.
+
+```sh
+make run ENABLE_WEBHOOKS=false
+```
+
 **NOTE:** You can also run this in one step by running: `make install run`
 
 ### Modifying the API definitions
