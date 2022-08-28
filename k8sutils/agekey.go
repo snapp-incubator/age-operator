@@ -79,7 +79,7 @@ func ValidateAgeKey(ageKey *v1alpha1.AgeKey, k8sclient client.Client) error {
 	if _, err := age.ParseX25519Identity(ageKey.Spec.AgeSecretKey); err != nil {
 		logger.Error(err, "invalid agekey on reconcile")
 		ageKey.Status.Message = "Invalid AgeKey"
-		_ = k8sclient.Update(context.Background(), ageKey)
+		_ = k8sclient.Status().Update(context.Background(), ageKey)
 		return fmt.Errorf("invalid AgeKey on field .Spec.ageSecretKey")
 	}
 	return nil
@@ -95,5 +95,5 @@ func GenerateAgeKeyParentDir(ageKey *v1alpha1.AgeKey) string {
 
 func UpdateAgeKeyStatus(ageKey *v1alpha1.AgeKey, k8sclient client.Client, msg string) error {
 	ageKey.Status.Message = msg
-	return k8sclient.Update(context.Background(), ageKey)
+	return k8sclient.Status().Update(context.Background(), ageKey)
 }

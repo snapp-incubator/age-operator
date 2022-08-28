@@ -32,7 +32,7 @@ type AgeSecretSpec struct {
 // AgeSecretStatus defines the observed state of AgeSecret
 type AgeSecretStatus struct {
 	Health  string `json:"health"`
-	Message string `json:"message,omitempty"`
+	Message string `json:"message"`
 }
 
 //+kubebuilder:object:root=true
@@ -40,6 +40,7 @@ type AgeSecretStatus struct {
 //+kubebuilder:printcolumn:name="Health",type=string,JSONPath=`.status.health`
 //+kubebuilder:printcolumn:name="Message",type=string,JSONPath=`.status.message`
 //+kubebuilder:printcolumn:name="Suspended",type=string,JSONPath=`.spec.suspend`
+//+kubebuilder:printcolumn:name="AgeKey",type=string,JSONPath=`.spec.ageKeyRef`
 //+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
 // AgeSecret is the Schema for the agesecrets API

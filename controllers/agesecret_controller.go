@@ -20,13 +20,19 @@ import (
 	"context"
 	"github.com/go-logr/logr"
 	"github.com/snapp-incubator/age-operator/k8sutils"
+	"github.com/snapp-incubator/age-operator/lang"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"time"
 
 	gitopssecretsnappcloudiov1alpha1 "github.com/snapp-incubator/age-operator/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+var (
+	requeueAfterTime = 1 * time.Minute
 )
 
 // AgeSecretReconciler reconciles a AgeSecret object
@@ -53,25 +59,29 @@ func (r *AgeSecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
-	if err = k8sutils.HandleAgeSecretFinalizers(ageSecretInstance, r.Client); err != nil {
+	goOn, err := k8sutils.HandleAgeSecretFinalizers(ageSecretInstance, r.Client)
+	if err != nil {
 		reqLogger.Info("could not handle AgeSecret finalizers", "namespace", ageSecretInstance.GetNamespace(), "name", ageSecretInstance.GetName(), "error", err)
-		return ctrl.Result{}, err
+		return ctrl.Result{Requeue: true, RequeueAfter: requeueAfterTime}, err
+	}
+	if !goOn {
+		return ctrl.Result{}, nil
 	}
 
 	if err = k8sutils.AddAgeSecretFinalizers(ageSecretInstance, r.Client); err != nil {
 		reqLogger.Info("could not add required finalizers to AgeSecret", "namespace", ageSecretInstance.GetNamespace(), "name", ageSecretInstance.GetName(), "error", err)
-		return ctrl.Result{}, err
-	}
-
-	refAgeKey, errAgeKey := k8sutils.CheckAgeKeyReference(ageSecretInstance, r.Client)
-	if errAgeKey != nil {
-		reqLogger.Info("could not fetch AgeSecret referenced AgeKey", "namespace", ageSecretInstance.GetNamespace(), "name", ageSecretInstance.GetName(), "error", errAgeKey)
-		return ctrl.Result{}, errAgeKey
+		return ctrl.Result{Requeue: true, RequeueAfter: requeueAfterTime}, err
 	}
 
 	if ageSecretInstance.Spec.Suspend {
 		reqLogger.Info("AgeSecret suspended", "namespace", ageSecretInstance.GetNamespace(), "name", ageSecretInstance.GetName())
 		return ctrl.Result{}, nil
+	}
+
+	refAgeKey, errAgeKey := k8sutils.CheckAgeKeyReference(ageSecretInstance, r.Client)
+	if errAgeKey != nil {
+		reqLogger.Info("could not fetch AgeSecret referenced AgeKey", "namespace", ageSecretInstance.GetNamespace(), "name", ageSecretInstance.GetName(), "error", errAgeKey)
+		return ctrl.Result{Requeue: true, RequeueAfter: requeueAfterTime}, errAgeKey
 	}
 
 	decryptedStringData, errDecrypt := k8sutils.DecryptAgeSecret(ageSecretInstance, r.Client, refAgeKey)
@@ -86,6 +96,8 @@ func (r *AgeSecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
+	ageSecretInstance.Status.Health = lang.AgeSecretStatusHealthy
+	_ = r.Status().Update(ctx, ageSecretInstance)
 	return ctrl.Result{}, nil
 }
 

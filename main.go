@@ -94,13 +94,15 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "AgeSecret")
 		os.Exit(1)
 	}
-	if err = (&gitopssecretsnappcloudiov1alpha1.AgeKey{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "AgeKey")
-		os.Exit(1)
-	}
-	if err = (&gitopssecretsnappcloudiov1alpha1.AgeSecret{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "AgeSecret")
-		os.Exit(1)
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err = (&gitopssecretsnappcloudiov1alpha1.AgeKey{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "AgeKey")
+			os.Exit(1)
+		}
+		if err = (&gitopssecretsnappcloudiov1alpha1.AgeSecret{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "AgeSecret")
+			os.Exit(1)
+		}
 	}
 	//+kubebuilder:scaffold:builder
 

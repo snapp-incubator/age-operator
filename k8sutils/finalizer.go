@@ -44,21 +44,22 @@ func HandleAgeKeyFinalizers(ageKey *v1alpha1.AgeKey, k8sclient client.Client) er
 	return nil
 }
 
-func HandleAgeSecretFinalizers(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client) error {
+func HandleAgeSecretFinalizers(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client) (bool, error) {
 	if ageSecret.GetDeletionTimestamp() != nil {
 		logger := finalizerLogger(ageSecret.GetNamespace(), AgeSecretFinalizer)
 		if controllerutil.ContainsFinalizer(ageSecret, AgeSecretFinalizer) {
 			if err := finalizeAgeSecret(ageSecret, k8sclient); err != nil {
-				return err
+				return false, err
 			}
 			controllerutil.RemoveFinalizer(ageSecret, AgeSecretFinalizer)
 			if err := k8sclient.Update(context.Background(), ageSecret); err != nil {
 				logger.Error(err, "Could not remove finalizer "+AgeSecretFinalizer)
-				return err
+				return false, err
 			}
 		}
+		return false, nil
 	}
-	return nil
+	return true, nil
 }
 
 func AddAgeKeyFinalizers(ageKey *v1alpha1.AgeKey, k8sclient client.Client) error {

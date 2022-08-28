@@ -28,9 +28,13 @@ func finalizeAgeSecret(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client) e
 	logger := finalizerLogger(ageSecret.GetNamespace(), AgeSecretFinalizer)
 	childSecret := &corev1.Secret{}
 	err := k8sclient.Get(context.Background(), types.NamespacedName{Name: ageSecret.GetName(), Namespace: ageSecret.GetNamespace()}, childSecret)
-	if err != nil && !errors.IsNotFound(err) {
-		logger.Error(err, "Could not get child secret"+ageSecret.GetName())
-		return err
+	if err != nil {
+		if !errors.IsNotFound(err) {
+			logger.Error(err, "Could not get child secret"+ageSecret.GetName())
+			return err
+		} else {
+			return nil
+		}
 	}
 	if err = k8sclient.Delete(context.Background(), childSecret); err != nil && !errors.IsNotFound(err) {
 		logger.Error(err, "Could not delete child secret "+ageSecret.GetName())
@@ -65,16 +69,16 @@ func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secre
 			if errCreateChildSecret != nil {
 				ageSecret.Status.Health = lang.AgeSecretStatusUnhealthy
 				ageSecret.Status.Message = "could not create child secret"
-				_ = k8sclient.Update(context.Background(), ageSecret)
+				_ = k8sclient.Status().Update(context.Background(), ageSecret)
 				return errCreateChildSecret
 			}
 			ageSecret.Status.Health = lang.AgeSecretStatusHealthy
-			_ = k8sclient.Update(context.Background(), ageSecret)
+			_ = k8sclient.Status().Update(context.Background(), ageSecret)
 			return nil
 		}
 		ageSecret.Status.Health = lang.AgeSecretStatusUnhealthy
 		ageSecret.Status.Message = "could not fetch child secret"
-		_ = k8sclient.Update(context.Background(), ageSecret)
+		_ = k8sclient.Status().Update(context.Background(), ageSecret)
 		return err
 	}
 
@@ -86,12 +90,12 @@ func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secre
 			logger.Error(err, "could not refresh child secret")
 			ageSecret.Status.Health = lang.AgeSecretStatusUnhealthy
 			ageSecret.Status.Message = "could not refresh child secret"
-			_ = k8sclient.Update(context.Background(), ageSecret)
+			_ = k8sclient.Status().Update(context.Background(), ageSecret)
 			return err
 		}
 	}
 	ageSecret.Status.Health = lang.AgeSecretStatusHealthy
-	_ = k8sclient.Update(context.Background(), ageSecret)
+	_ = k8sclient.Status().Update(context.Background(), ageSecret)
 	return nil
 }
 
@@ -157,5 +161,5 @@ func cloneMap(oldMap map[string]string) map[string]string {
 func UpdateAgeSecretStatus(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client, health, msg string) error {
 	ageSecret.Status.Health = health
 	ageSecret.Status.Message = msg
-	return k8sclient.Update(context.Background(), ageSecret)
+	return k8sclient.Status().Update(context.Background(), ageSecret)
 }
