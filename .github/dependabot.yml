@@ -8,6 +8,10 @@ updates:
       - navid.shariaty
     labels:
       - dependencies
+    groups:
+       dev-dependencies:
+          patterns:
+            - "*"  
 
   - package-ecosystem: "docker"
     directory: "/"
@@ -17,4 +21,7 @@ updates:
       - navid.shariaty
     labels:
       - dependencies
-
+    groups:
+       dev-dependencies:
+          patterns:
+            - "*"  
