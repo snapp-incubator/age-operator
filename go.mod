@@ -1,6 +1,6 @@
 module github.com/snapp-incubator/age-operator
 
-go 1.17
+go 1.20
 
 require (
 	filippo.io/age v1.1.1

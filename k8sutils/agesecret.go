@@ -62,6 +62,7 @@ func CreateChildFromAgeSecret(ageSecret *v1alpha1.AgeSecret, k8sclient client.Cl
 
 func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secret, k8sclient client.Client) error {
 	secretToLoad := &corev1.Secret{}
+	logger := NewLogger(ageSecret.GetNamespace(), ageSecret.GetName())
 	err := k8sclient.Get(context.Background(), types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}, secretToLoad)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -83,9 +84,8 @@ func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secre
 	}
 
 	if !apiequality.Semantic.DeepEqual(secretToLoad, secret) {
-		logger := NewLogger(ageSecret.GetNamespace(), ageSecret.GetName())
 		logger.Info("child secret exists but needs to get refreshed")
-		err = k8sclient.Update(context.Background(), ageSecret)
+		err = k8sclient.Update(context.Background(), secret)
 		if err != nil {
 			logger.Error(err, "could not refresh child secret")
 			ageSecret.Status.Health = lang.AgeSecretStatusUnhealthy
@@ -94,8 +94,11 @@ func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secre
 			return err
 		}
 	}
-	ageSecret.Status.Health = lang.AgeSecretStatusHealthy
-	_ = k8sclient.Status().Update(context.Background(), ageSecret)
+	if ageSecret.Status.Health != lang.AgeSecretStatusHealthy {
+		ageSecret.Status.Health = lang.AgeSecretStatusHealthy
+		errUpdateHealth := k8sclient.Status().Update(context.Background(), ageSecret)
+		logger.Error(errUpdateHealth, "Could not update status of ageSecret", "namespace", ageSecret.GetNamespace(), "name", ageSecret.GetName())
+	}
 	return nil
 }
 
