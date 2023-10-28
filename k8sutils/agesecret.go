@@ -5,7 +5,6 @@ import (
 	"context"
 	"filippo.io/age"
 	"filippo.io/age/armor"
-	"fmt"
 	"github.com/snapp-incubator/age-operator/api/v1alpha1"
 	"github.com/snapp-incubator/age-operator/lang"
 	"io"
@@ -48,9 +47,7 @@ func finalizeAgeSecret(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client) e
 }
 
 func CreateChildFromAgeSecret(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client, rawStringData map[string]string) error {
-	fmt.Println("---- before ----", ageSecret.GetLabels())
 	childSecretLabels := cloneLabels(ageSecret.GetLabels())
-	fmt.Println("---- after ----", childSecretLabels)
 	childSecretAnnotations := cloneAnnotations(ageSecret.GetAnnotations())
 	childSecretMetaObj := metav1.ObjectMeta{
 		Name:        ageSecret.GetName(),
@@ -90,7 +87,6 @@ func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secre
 		return err
 	}
 
-	fmt.Println("before secret", secret)
 	if !apiequality.Semantic.DeepEqual(secretToLoad, secret) {
 		logger.Info("child secret exists but needs to get refreshed")
 		err = k8sclient.Update(context.Background(), secret)
@@ -102,8 +98,6 @@ func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secre
 			return err
 		}
 	}
-	fmt.Println("after secret to load", secretToLoad)
-	fmt.Println("after secret", secret)
 	if ageSecret.Status.Health != lang.AgeSecretStatusHealthy {
 		ageSecret.Status.Health = lang.AgeSecretStatusHealthy
 		errUpdateHealth := k8sclient.Status().Update(context.Background(), ageSecret)
