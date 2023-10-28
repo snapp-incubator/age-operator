@@ -22,6 +22,9 @@ var (
 	unwantedAnnotations = []string{
 		"kubectl.kubernetes.io/last-applied-configuration",
 	}
+	unwantedLabels = []string{
+		"app.kubernetes.io/instance",
+	}
 )
 
 func finalizeAgeSecret(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client) error {
@@ -66,6 +69,7 @@ func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secre
 	err := k8sclient.Get(context.Background(), types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}, secretToLoad)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			logger.Info("secret not found, creating...", "namespace", secret.Namespace, "secretName", secret.Name)
 			errCreateChildSecret := k8sclient.Create(context.Background(), secret)
 			if errCreateChildSecret != nil {
 				ageSecret.Status.Health = lang.AgeSecretStatusUnhealthy
@@ -140,7 +144,11 @@ func CheckAgeKeyReference(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client
 }
 
 func cloneLabels(labels map[string]string) map[string]string {
-	return cloneMap(labels)
+	tmpLabels := cloneMap(labels)
+	for _, label := range unwantedLabels {
+		delete(tmpLabels, label)
+	}
+	return tmpLabels
 }
 
 func cloneAnnotations(annotations map[string]string) map[string]string {
