@@ -5,6 +5,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/snapp-incubator/age-operator/api/v1alpha1"
+	"github.com/snapp-incubator/age-operator/consts"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -19,8 +20,6 @@ var (
 	fooValidAgeKeyPath3   = filepath.Join("..", "config", "samples", "_v1alpha1_agekey3.yaml")
 	fooValidAgeKeyPath2   = filepath.Join("..", "config", "samples", "_v1alpha1_agekey2.yaml")
 	fooValidAgeSecretPath = filepath.Join("..", "config", "samples", "_v1alpha1_agesecret.yaml")
-
-	unwantedLabel = "app.kubernetes.io/instance"
 )
 
 var _ = Describe("", func() {
@@ -77,12 +76,19 @@ var _ = Describe("", func() {
 			err = k8sClient.Get(ctx, types.NamespacedName{Namespace: validAgeSecretObj.Namespace, Name: validAgeSecretObj.Name}, fooSecretObj)
 			Expect(err).To(BeNil())
 			Expect(fooSecretObj.GetAnnotations()).Should(Equal(validAgeSecretObj.GetAnnotations()))
-			// check unwanted label to be removed
+
+			// make sure unwanted label is removed
 			unwantedLabelExists := false
 			secretLabels := fooSecretObj.GetLabels()
 			for _, label := range secretLabels {
-				if label == unwantedLabel {
-					unwantedLabelExists = true
+				for _, unwantedLabel := range consts.ExcessLabels {
+					if label == unwantedLabel {
+						unwantedLabelExists = true
+						break
+					}
+				}
+				if unwantedLabelExists {
+					break
 				}
 			}
 			Expect(unwantedLabelExists).To(BeFalse())
@@ -94,11 +100,6 @@ var _ = Describe("", func() {
 			testKeyValue, exists := fooSecretObj.Data["test_key"]
 			Expect(string(testKeyValue)).Should(Equal("test_value"))
 			Expect(exists).To(BeTrue())
-
-			// Remove secret, it should be created again
-			//err = k8sClient.Delete(ctx, fooSecretObj)
-			//err = k8sClient.Get(ctx, types.NamespacedName{Namespace: validAgeSecretObj.Namespace, Name: validAgeSecretObj.Name}, fooSecretObj)
-			//Expect(err).To(BeNil())
 
 			err = k8sClient.Delete(ctx, validAgeKeyObj)
 			Expect(err).To(BeNil())

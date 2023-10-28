@@ -6,6 +6,7 @@ import (
 	"filippo.io/age"
 	"filippo.io/age/armor"
 	"github.com/snapp-incubator/age-operator/api/v1alpha1"
+	"github.com/snapp-incubator/age-operator/consts"
 	"github.com/snapp-incubator/age-operator/lang"
 	"io"
 	corev1 "k8s.io/api/core/v1"
@@ -16,15 +17,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
-)
-
-var (
-	unwantedAnnotations = []string{
-		"kubectl.kubernetes.io/last-applied-configuration",
-	}
-	unwantedLabels = []string{
-		"app.kubernetes.io/instance",
-	}
 )
 
 func finalizeAgeSecret(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client) error {
@@ -145,7 +137,7 @@ func CheckAgeKeyReference(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client
 
 func cloneLabels(labels map[string]string) map[string]string {
 	tmpLabels := cloneMap(labels)
-	for _, label := range unwantedLabels {
+	for _, label := range consts.ExcessLabels {
 		delete(tmpLabels, label)
 	}
 	return tmpLabels
@@ -153,7 +145,7 @@ func cloneLabels(labels map[string]string) map[string]string {
 
 func cloneAnnotations(annotations map[string]string) map[string]string {
 	tmpAnnotations := cloneMap(annotations)
-	for _, annotation := range unwantedAnnotations {
+	for _, annotation := range consts.ExcessAnnotations {
 		delete(tmpAnnotations, annotation)
 	}
 	return tmpAnnotations
