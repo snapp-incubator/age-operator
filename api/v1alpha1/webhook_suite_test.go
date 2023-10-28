@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"path/filepath"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"testing"
 	"time"
 
@@ -50,7 +51,7 @@ var cancel context.CancelFunc
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
-	//RunSpecs(t, "Webhook Suite")
+	RunSpecsWithDefaultAndCustomReporters(t, "Webhook Suite", []Reporter{})
 }
 
 var _ = BeforeSuite(func() {
@@ -88,8 +89,14 @@ var _ = BeforeSuite(func() {
 
 	// start webhook server using Manager
 	webhookInstallOptions := &testEnv.WebhookInstallOptions
+	webhookSrv := webhook.NewServer(webhook.Options{
+		Host:    webhookInstallOptions.LocalServingHost,
+		Port:    webhookInstallOptions.LocalServingPort,
+		CertDir: webhookInstallOptions.LocalServingCertDir,
+	})
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:         scheme,
+		WebhookServer:  webhookSrv,
 		LeaderElection: false,
 	})
 	Expect(err).NotTo(HaveOccurred())
