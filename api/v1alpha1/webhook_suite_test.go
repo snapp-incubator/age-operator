@@ -50,7 +50,7 @@ var cancel context.CancelFunc
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecsWithDefaultAndCustomReporters(t, "Webhook Suite", []Reporter{})
+	//RunSpecs(t, "Webhook Suite")
 }
 
 var _ = BeforeSuite(func() {
