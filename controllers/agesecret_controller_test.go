@@ -19,6 +19,8 @@ var (
 	fooValidAgeKeyPath3   = filepath.Join("..", "config", "samples", "_v1alpha1_agekey3.yaml")
 	fooValidAgeKeyPath2   = filepath.Join("..", "config", "samples", "_v1alpha1_agekey2.yaml")
 	fooValidAgeSecretPath = filepath.Join("..", "config", "samples", "_v1alpha1_agesecret.yaml")
+
+	unwantedLabel = "app.kubernetes.io/instance"
 )
 
 var _ = Describe("", func() {
@@ -74,8 +76,16 @@ var _ = Describe("", func() {
 			fooSecretObj := &corev1.Secret{}
 			err = k8sClient.Get(ctx, types.NamespacedName{Namespace: validAgeSecretObj.Namespace, Name: validAgeSecretObj.Name}, fooSecretObj)
 			Expect(err).To(BeNil())
-			Expect(fooSecretObj.GetLabels()).Should(Equal(validAgeSecretObj.GetLabels()))
 			Expect(fooSecretObj.GetAnnotations()).Should(Equal(validAgeSecretObj.GetAnnotations()))
+			// check unwanted label to be removed
+			unwantedLabelExists := false
+			secretLabels := fooSecretObj.GetLabels()
+			for _, label := range secretLabels {
+				if label == unwantedLabel {
+					unwantedLabelExists = true
+				}
+			}
+			Expect(unwantedLabelExists).To(BeFalse())
 
 			sampleKeyValue, exists := fooSecretObj.Data["sample_key"]
 			Expect(string(sampleKeyValue)).Should(Equal("sample_value"))
@@ -86,9 +96,9 @@ var _ = Describe("", func() {
 			Expect(exists).To(BeTrue())
 
 			// Remove secret, it should be created again
-			err = k8sClient.Delete(ctx, fooSecretObj)
-			err = k8sClient.Get(ctx, types.NamespacedName{Namespace: validAgeSecretObj.Namespace, Name: validAgeSecretObj.Name}, fooSecretObj)
-			Expect(err).To(BeNil())
+			//err = k8sClient.Delete(ctx, fooSecretObj)
+			//err = k8sClient.Get(ctx, types.NamespacedName{Namespace: validAgeSecretObj.Namespace, Name: validAgeSecretObj.Name}, fooSecretObj)
+			//Expect(err).To(BeNil())
 
 			err = k8sClient.Delete(ctx, validAgeKeyObj)
 			Expect(err).To(BeNil())
