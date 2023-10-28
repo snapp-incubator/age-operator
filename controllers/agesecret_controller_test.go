@@ -85,6 +85,11 @@ var _ = Describe("", func() {
 			Expect(string(testKeyValue)).Should(Equal("test_value"))
 			Expect(exists).To(BeTrue())
 
+			// Remove secret, it should be created again
+			err = k8sClient.Delete(ctx, fooSecretObj)
+			err = k8sClient.Get(ctx, types.NamespacedName{Namespace: validAgeSecretObj.Namespace, Name: validAgeSecretObj.Name}, fooSecretObj)
+			Expect(err).To(BeNil())
+
 			err = k8sClient.Delete(ctx, validAgeKeyObj)
 			Expect(err).To(BeNil())
 
