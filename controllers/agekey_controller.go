@@ -21,6 +21,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/snapp-incubator/age-operator/k8sutils"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"time"
 
 	gitopssecretsnappcloudiov1alpha1 "github.com/snapp-incubator/age-operator/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -54,7 +55,7 @@ func (r *AgeKeyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{}, err
+		return ctrl.Result{Requeue: true, RequeueAfter: 20 * time.Second}, err
 	}
 
 	if err = k8sutils.HandleAgeKeyFinalizers(ageKeyInstance, r.Client); err != nil {

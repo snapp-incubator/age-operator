@@ -15,8 +15,8 @@ limitations under the License.
 */
 
 // Package v1alpha1 contains API Schema definitions for the  v1alpha1 API group
-//+kubebuilder:object:generate=true
-//+groupName=gitopssecret.snappcloud.io
+// +kubebuilder:object:generate=true
+// +groupName=gitopssecret.snappcloud.io
 package v1alpha1
 
 import (

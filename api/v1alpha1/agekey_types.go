@@ -35,8 +35,8 @@ type AgeKeyStatus struct {
 //+kubebuilder:subresource:status
 
 // AgeKey is the Schema for the agekeys API
-//+kubebuilder:printcolumn:name="Message",type=string,JSONPath=`.status.message`
-//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
+// +kubebuilder:printcolumn:name="Message",type=string,JSONPath=`.status.message`
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 type AgeKey struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

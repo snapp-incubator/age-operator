@@ -24,15 +24,15 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	gitopssecretsnappcloudiov1alpha1 "github.com/snapp-incubator/age-operator/api/v1alpha1"
+	"github.com/snapp-incubator/age-operator/controllers"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	gitopssecretsnappcloudiov1alpha1 "github.com/snapp-incubator/age-operator/api/v1alpha1"
-	"github.com/snapp-incubator/age-operator/controllers"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -67,8 +67,7 @@ func main() {
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
-		MetricsBindAddress:     metricsAddr,
-		Port:                   9443,
+		Metrics:                server.Options{BindAddress: metricsAddr},
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "48ffd8e3.gitopssecret.snappcloud.io",

@@ -22,6 +22,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"strings"
 )
 
@@ -49,28 +50,28 @@ func (r *AgeSecret) Default() {
 var _ webhook.Validator = &AgeSecret{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *AgeSecret) ValidateCreate() error {
+func (r *AgeSecret) ValidateCreate() (admission.Warnings, error) {
 	ageSecretLog.Info("validate create", "name", r.Name)
 	if err := r.ValidateAgeSecret(); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return nil, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *AgeSecret) ValidateUpdate(old runtime.Object) error {
+func (r *AgeSecret) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	ageSecretLog.Info("validate update", "name", r.Name)
 	if err := r.ValidateAgeSecret(); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return nil, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *AgeSecret) ValidateDelete() error {
+func (r *AgeSecret) ValidateDelete() (admission.Warnings, error) {
 	ageSecretLog.Info("validate delete", "name", r.Name)
 
-	return nil
+	return nil, nil
 }
 
 func (r *AgeSecret) ValidateAgeSecret() error {

@@ -14,6 +14,7 @@ COPY main.go main.go
 COPY api/ api/
 COPY controllers/ controllers/
 COPY k8sutils/ k8sutils/
+COPY consts/ consts/
 COPY lang/ lang/
 
 # Build

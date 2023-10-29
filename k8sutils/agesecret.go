@@ -6,6 +6,7 @@ import (
 	"filippo.io/age"
 	"filippo.io/age/armor"
 	"github.com/snapp-incubator/age-operator/api/v1alpha1"
+	"github.com/snapp-incubator/age-operator/consts"
 	"github.com/snapp-incubator/age-operator/lang"
 	"io"
 	corev1 "k8s.io/api/core/v1"
@@ -16,12 +17,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
-)
-
-var (
-	unwantedAnnotations = []string{
-		"kubectl.kubernetes.io/last-applied-configuration",
-	}
 )
 
 func finalizeAgeSecret(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client) error {
@@ -62,9 +57,11 @@ func CreateChildFromAgeSecret(ageSecret *v1alpha1.AgeSecret, k8sclient client.Cl
 
 func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secret, k8sclient client.Client) error {
 	secretToLoad := &corev1.Secret{}
+	logger := NewLogger(ageSecret.GetNamespace(), ageSecret.GetName())
 	err := k8sclient.Get(context.Background(), types.NamespacedName{Namespace: secret.Namespace, Name: secret.Name}, secretToLoad)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			logger.Info("secret not found, creating...", "namespace", secret.Namespace, "secretName", secret.Name)
 			errCreateChildSecret := k8sclient.Create(context.Background(), secret)
 			if errCreateChildSecret != nil {
 				ageSecret.Status.Health = lang.AgeSecretStatusUnhealthy
@@ -83,9 +80,8 @@ func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secre
 	}
 
 	if !apiequality.Semantic.DeepEqual(secretToLoad, secret) {
-		logger := NewLogger(ageSecret.GetNamespace(), ageSecret.GetName())
 		logger.Info("child secret exists but needs to get refreshed")
-		err = k8sclient.Update(context.Background(), ageSecret)
+		err = k8sclient.Update(context.Background(), secret)
 		if err != nil {
 			logger.Error(err, "could not refresh child secret")
 			ageSecret.Status.Health = lang.AgeSecretStatusUnhealthy
@@ -94,8 +90,11 @@ func CreateOrUpdateSecretObj(ageSecret *v1alpha1.AgeSecret, secret *corev1.Secre
 			return err
 		}
 	}
-	ageSecret.Status.Health = lang.AgeSecretStatusHealthy
-	_ = k8sclient.Status().Update(context.Background(), ageSecret)
+	if ageSecret.Status.Health != lang.AgeSecretStatusHealthy {
+		ageSecret.Status.Health = lang.AgeSecretStatusHealthy
+		errUpdateHealth := k8sclient.Status().Update(context.Background(), ageSecret)
+		logger.Error(errUpdateHealth, "Could not update status of ageSecret", "namespace", ageSecret.GetNamespace(), "name", ageSecret.GetName())
+	}
 	return nil
 }
 
@@ -137,12 +136,16 @@ func CheckAgeKeyReference(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client
 }
 
 func cloneLabels(labels map[string]string) map[string]string {
-	return cloneMap(labels)
+	tmpLabels := cloneMap(labels)
+	for _, label := range consts.ExcessLabels {
+		delete(tmpLabels, label)
+	}
+	return tmpLabels
 }
 
 func cloneAnnotations(annotations map[string]string) map[string]string {
 	tmpAnnotations := cloneMap(annotations)
-	for _, annotation := range unwantedAnnotations {
+	for _, annotation := range consts.ExcessAnnotations {
 		delete(tmpAnnotations, annotation)
 	}
 	return tmpAnnotations

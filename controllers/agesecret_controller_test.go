@@ -5,6 +5,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/snapp-incubator/age-operator/api/v1alpha1"
+	"github.com/snapp-incubator/age-operator/consts"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -74,8 +75,23 @@ var _ = Describe("", func() {
 			fooSecretObj := &corev1.Secret{}
 			err = k8sClient.Get(ctx, types.NamespacedName{Namespace: validAgeSecretObj.Namespace, Name: validAgeSecretObj.Name}, fooSecretObj)
 			Expect(err).To(BeNil())
-			Expect(fooSecretObj.GetLabels()).Should(Equal(validAgeSecretObj.GetLabels()))
 			Expect(fooSecretObj.GetAnnotations()).Should(Equal(validAgeSecretObj.GetAnnotations()))
+
+			// make sure unwanted label is removed
+			unwantedLabelExists := false
+			secretLabels := fooSecretObj.GetLabels()
+			for _, label := range secretLabels {
+				for _, unwantedLabel := range consts.ExcessLabels {
+					if label == unwantedLabel {
+						unwantedLabelExists = true
+						break
+					}
+				}
+				if unwantedLabelExists {
+					break
+				}
+			}
+			Expect(unwantedLabelExists).To(BeFalse())
 
 			sampleKeyValue, exists := fooSecretObj.Data["sample_key"]
 			Expect(string(sampleKeyValue)).Should(Equal("sample_value"))
