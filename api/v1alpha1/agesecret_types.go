@@ -24,7 +24,7 @@ import (
 type AgeSecretSpec struct {
 	AgeKeyRef      string   `json:"ageKeyRef"`
 	StringData     string   `json:"stringData"`
-	Suspend        bool     `json:"suspend"`
+	Suspend        bool     `json:"suspend,omitempty"`
 	LabelsToRemove []string `json:"labelsToRemove,omitempty"`
 }
 
