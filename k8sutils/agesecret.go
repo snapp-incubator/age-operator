@@ -5,6 +5,7 @@ import (
 	"context"
 	"filippo.io/age"
 	"filippo.io/age/armor"
+	"fmt"
 	"github.com/snapp-incubator/age-operator/api/v1alpha1"
 	"github.com/snapp-incubator/age-operator/consts"
 	"github.com/snapp-incubator/age-operator/lang"
@@ -138,8 +139,10 @@ func CheckAgeKeyReference(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client
 func cloneLabels(labels map[string]string, labelsToRemove []string) map[string]string {
 	tmpLabels := cloneMap(labels)
 	for _, label := range labelsToRemove {
+		fmt.Println("============ here =========", label)
 		delete(tmpLabels, label)
 	}
+	fmt.Println("============ here2 =========", tmpLabels)
 	return tmpLabels
 }
 
