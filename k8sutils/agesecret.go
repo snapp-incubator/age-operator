@@ -39,7 +39,7 @@ func finalizeAgeSecret(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client) e
 }
 
 func CreateChildFromAgeSecret(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client, rawStringData map[string]string) error {
-	childSecretLabels := cloneLabels(ageSecret.GetLabels())
+	childSecretLabels := cloneLabels(ageSecret.GetLabels(), ageSecret.Spec.LabelsToRemove)
 	childSecretAnnotations := cloneAnnotations(ageSecret.GetAnnotations())
 	childSecretMetaObj := metav1.ObjectMeta{
 		Name:        ageSecret.GetName(),
@@ -135,9 +135,9 @@ func CheckAgeKeyReference(ageSecret *v1alpha1.AgeSecret, k8sclient client.Client
 	return ageKeyObj, nil
 }
 
-func cloneLabels(labels map[string]string) map[string]string {
+func cloneLabels(labels map[string]string, labelsToRemove []string) map[string]string {
 	tmpLabels := cloneMap(labels)
-	for _, label := range consts.ExcessLabels {
+	for _, label := range labelsToRemove {
 		delete(tmpLabels, label)
 	}
 	return tmpLabels

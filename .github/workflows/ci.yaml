@@ -18,19 +18,27 @@ jobs:
         with:
           version: latest
           args: --timeout 5m
-  test:
-    name: test
+  test-api:
+    name: test-api
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: run tests using make
-        run: make test
+      - name: run api tests using make
+        run: make test-api
+  test-controller:
+    name: test-controller
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: run controller tests using make
+        run: make test-controller
   docker:
     name: docker
     runs-on: ubuntu-latest
     needs:
       - lint
-      - test
+      - test-api
+      - test-controller
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
