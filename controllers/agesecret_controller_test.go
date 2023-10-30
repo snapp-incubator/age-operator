@@ -2,10 +2,9 @@ package controllers
 
 import (
 	"context"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/snapp-incubator/age-operator/api/v1alpha1"
-	"github.com/snapp-incubator/age-operator/consts"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,7 +21,7 @@ var (
 	fooValidAgeSecretPath = filepath.Join("..", "config", "samples", "_v1alpha1_agesecret.yaml")
 )
 
-var _ = Describe("", func() {
+var _ = Describe("", Serial, func() {
 	ctx := context.Background()
 	validAgeKeyObj := &v1alpha1.AgeKey{}
 	invalidAgeKeyObj := &v1alpha1.AgeKey{}
@@ -81,7 +80,7 @@ var _ = Describe("", func() {
 			unwantedLabelExists := false
 			secretLabels := fooSecretObj.GetLabels()
 			for _, label := range secretLabels {
-				for _, unwantedLabel := range consts.ExcessLabels {
+				for _, unwantedLabel := range validAgeSecretObj.Spec.LabelsToRemove {
 					if label == unwantedLabel {
 						unwantedLabelExists = true
 						break

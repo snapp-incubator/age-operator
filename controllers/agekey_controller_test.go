@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"context"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/snapp-incubator/age-operator/api/v1alpha1"
 	"github.com/snapp-incubator/age-operator/k8sutils"

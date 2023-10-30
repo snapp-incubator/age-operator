@@ -128,6 +128,9 @@ metadata:
     annotations:
         ... {fill annotations}
 spec:
+    labelsToRemove:
+      - {label1}
+      - {label2}
     suspend: {fill suspend}
     ageKeyRef: {fill ref name}
     stringData:
@@ -146,6 +149,9 @@ spec:
 
 - <h5>annotations</h5>
   A set of "key:value" that will be <b>copied inside the generated secret</b>.
+
+- <h5>labelsToRemove</h5>
+  An array of labels to remove while creating the child secret, and not to inherit them. Sample use-case is inside CD on k8s, when you want a label selector to track "AgeSecret" but not the child secret.
 
 - <h5>suspend</h5>
   It's boolean. The default value is <b>false</b>. It determines whether the controller should reconcile on changes and apply changes to secret or you are just testing and the controller should not change anything.

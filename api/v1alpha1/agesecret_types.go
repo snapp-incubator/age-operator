@@ -22,11 +22,10 @@ import (
 
 // AgeSecretSpec defines the desired state of AgeSecret
 type AgeSecretSpec struct {
-	// +kubebuilder:validation:Required
-	AgeKeyRef  string `json:"ageKeyRef"`
-	StringData string `json:"stringData"`
-	// +kubebuilder:validation:Optional
-	Suspend bool `json:"suspend"`
+	AgeKeyRef      string   `json:"ageKeyRef"`
+	StringData     string   `json:"stringData"`
+	Suspend        bool     `json:"suspend,omitempty"`
+	LabelsToRemove []string `json:"labelsToRemove,omitempty"`
 }
 
 // AgeSecretStatus defines the observed state of AgeSecret
@@ -43,7 +42,7 @@ type AgeSecretStatus struct {
 //+kubebuilder:printcolumn:name="AgeKey",type=string,JSONPath=`.spec.ageKeyRef`
 //+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
-// AgeSecret is the Schema for the agesecrets API
+// AgeSecret is the Schema for the AgeSecrets API
 type AgeSecret struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
