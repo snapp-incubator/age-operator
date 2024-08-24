@@ -162,9 +162,8 @@ spec:
 - <h5>stringData</h5>
   This field is where you should put the encrypted Age message without its "-----BEGIN AGE ENCRYPTED FILE-----" prefix and "-----END AGE ENCRYPTED FILE-----" suffix.
 
-:::note
-Be careful not to push files containing "secret key" or "plain configuration" on git during the encryption and decryption steps.
-:::
+> [!NOTE]
+> Be careful not to push files containing "secret key" or "plain configuration" on git during the encryption and decryption steps.
 
 Here is an `AgeSecret` sample:
 
