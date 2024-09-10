@@ -24,8 +24,6 @@ spec:
       labels:
         control-plane: controller-manager
     spec:
-      securityContext:
-        runAsNonRoot: true
       containers:
       - command:
         - /manager
@@ -34,8 +32,6 @@ spec:
         image: ghcr.io/snapp-incubator/age-operator:main
         imagePullPolicy: Always
         name: manager
-        securityContext:
-          allowPrivilegeEscalation: false
         livenessProbe:
           httpGet:
             path: /healthz
