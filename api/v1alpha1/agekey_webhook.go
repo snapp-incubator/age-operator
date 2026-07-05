@@ -17,14 +17,16 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"filippo.io/age"
+	"context"
 	"fmt"
+	"strings"
+
+	"filippo.io/age"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
-	"strings"
 )
 
 // log is for logging in this package.
@@ -36,44 +38,64 @@ var (
 func (r *AgeKey) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r).
+		WithDefaulter(&AgeKeyCustomDefaulter{}).
+		WithValidator(&AgeKeyCustomValidator{}).
 		Complete()
 }
 
 //+kubebuilder:webhook:path=/mutate-gitopssecret-snappcloud-io-v1alpha1-agekey,mutating=true,failurePolicy=fail,sideEffects=None,groups=gitopssecret.snappcloud.io,resources=agekeys,verbs=create;update,versions=v1alpha1,name=magekey.kb.io,admissionReviewVersions=v1
 
-var _ webhook.Defaulter = &AgeKey{}
+// AgeKeyCustomDefaulter mutates AgeKey resources on create and update.
+// +kubebuilder:object:generate=false
+type AgeKeyCustomDefaulter struct{}
 
-// Default implements webhook.Defaulter so a webhook will be registered for the type
-func (r *AgeKey) Default() {
-	ageKeyLog.Info("default", "name", r.Name)
+var _ webhook.CustomDefaulter = &AgeKeyCustomDefaulter{}
+
+// Default implements webhook.CustomDefaulter so a webhook will be registered for the type.
+func (d *AgeKeyCustomDefaulter) Default(_ context.Context, obj runtime.Object) error {
+	ageKey, ok := obj.(*AgeKey)
+	if !ok {
+		return fmt.Errorf("expected an AgeKey object but got %T", obj)
+	}
+	ageKeyLog.Info("default", "name", ageKey.Name)
+	return nil
 }
 
 //+kubebuilder:webhook:path=/validate-gitopssecret-snappcloud-io-v1alpha1-agekey,mutating=false,failurePolicy=fail,sideEffects=None,groups=gitopssecret.snappcloud.io,resources=agekeys,verbs=create;update,versions=v1alpha1,name=vagekey.kb.io,admissionReviewVersions=v1
 
-var _ webhook.Validator = &AgeKey{}
+// AgeKeyCustomValidator validates AgeKey resources.
+// +kubebuilder:object:generate=false
+type AgeKeyCustomValidator struct{}
 
-// ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *AgeKey) ValidateCreate() (admission.Warnings, error) {
-	ageKeyLog.Info("validate create", "name", r.Name)
-	if err := r.ValidateAgeKey(); err != nil {
-		return nil, err
+var _ webhook.CustomValidator = &AgeKeyCustomValidator{}
+
+// ValidateCreate implements webhook.CustomValidator so a webhook will be registered for the type.
+func (v *AgeKeyCustomValidator) ValidateCreate(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	ageKey, ok := obj.(*AgeKey)
+	if !ok {
+		return nil, fmt.Errorf("expected an AgeKey object but got %T", obj)
 	}
-	return nil, nil
+	ageKeyLog.Info("validate create", "name", ageKey.Name)
+	return nil, ageKey.ValidateAgeKey()
 }
 
-// ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *AgeKey) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
-	ageKeyLog.Info("validate update", "name", r.Name)
-	if err := r.ValidateAgeKey(); err != nil {
-		return nil, err
+// ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type.
+func (v *AgeKeyCustomValidator) ValidateUpdate(_ context.Context, _, newObj runtime.Object) (admission.Warnings, error) {
+	ageKey, ok := newObj.(*AgeKey)
+	if !ok {
+		return nil, fmt.Errorf("expected an AgeKey object but got %T", newObj)
 	}
-	return nil, nil
+	ageKeyLog.Info("validate update", "name", ageKey.Name)
+	return nil, ageKey.ValidateAgeKey()
 }
 
-// ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *AgeKey) ValidateDelete() (admission.Warnings, error) {
-	ageKeyLog.Info("validate delete", "name", r.Name)
-
+// ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type.
+func (v *AgeKeyCustomValidator) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+	ageKey, ok := obj.(*AgeKey)
+	if !ok {
+		return nil, fmt.Errorf("expected an AgeKey object but got %T", obj)
+	}
+	ageKeyLog.Info("validate delete", "name", ageKey.Name)
 	return nil, nil
 }
 

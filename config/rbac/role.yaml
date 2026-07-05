@@ -8,31 +8,6 @@ rules:
   - gitopssecret.snappcloud.io
   resources:
   - agekeys
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - gitopssecret.snappcloud.io
-  resources:
-  - agekeys/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - gitopssecret.snappcloud.io
-  resources:
-  - agekeys/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - gitopssecret.snappcloud.io
-  resources:
   - agesecrets
   verbs:
   - create
@@ -45,12 +20,14 @@ rules:
 - apiGroups:
   - gitopssecret.snappcloud.io
   resources:
+  - agekeys/finalizers
   - agesecrets/finalizers
   verbs:
   - update
 - apiGroups:
   - gitopssecret.snappcloud.io
   resources:
+  - agekeys/status
   - agesecrets/status
   verbs:
   - get
