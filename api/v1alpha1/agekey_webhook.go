@@ -22,10 +22,8 @@ import (
 	"strings"
 
 	"filippo.io/age"
-	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -36,8 +34,7 @@ var (
 )
 
 func (r *AgeKey) SetupWebhookWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewWebhookManagedBy(mgr).
-		For(r).
+	return ctrl.NewWebhookManagedBy(mgr, r).
 		WithDefaulter(&AgeKeyCustomDefaulter{}).
 		WithValidator(&AgeKeyCustomValidator{}).
 		Complete()
@@ -49,14 +46,10 @@ func (r *AgeKey) SetupWebhookWithManager(mgr ctrl.Manager) error {
 // +kubebuilder:object:generate=false
 type AgeKeyCustomDefaulter struct{}
 
-var _ webhook.CustomDefaulter = &AgeKeyCustomDefaulter{}
+var _ admission.Defaulter[*AgeKey] = &AgeKeyCustomDefaulter{}
 
-// Default implements webhook.CustomDefaulter so a webhook will be registered for the type.
-func (d *AgeKeyCustomDefaulter) Default(_ context.Context, obj runtime.Object) error {
-	ageKey, ok := obj.(*AgeKey)
-	if !ok {
-		return fmt.Errorf("expected an AgeKey object but got %T", obj)
-	}
+// Default implements admission.Defaulter so a webhook will be registered for the type.
+func (d *AgeKeyCustomDefaulter) Default(_ context.Context, ageKey *AgeKey) error {
 	ageKeyLog.Info("default", "name", ageKey.Name)
 	return nil
 }
@@ -67,34 +60,22 @@ func (d *AgeKeyCustomDefaulter) Default(_ context.Context, obj runtime.Object) e
 // +kubebuilder:object:generate=false
 type AgeKeyCustomValidator struct{}
 
-var _ webhook.CustomValidator = &AgeKeyCustomValidator{}
+var _ admission.Validator[*AgeKey] = &AgeKeyCustomValidator{}
 
-// ValidateCreate implements webhook.CustomValidator so a webhook will be registered for the type.
-func (v *AgeKeyCustomValidator) ValidateCreate(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	ageKey, ok := obj.(*AgeKey)
-	if !ok {
-		return nil, fmt.Errorf("expected an AgeKey object but got %T", obj)
-	}
+// ValidateCreate implements admission.Validator so a webhook will be registered for the type.
+func (v *AgeKeyCustomValidator) ValidateCreate(_ context.Context, ageKey *AgeKey) (admission.Warnings, error) {
 	ageKeyLog.Info("validate create", "name", ageKey.Name)
 	return nil, ageKey.ValidateAgeKey()
 }
 
-// ValidateUpdate implements webhook.CustomValidator so a webhook will be registered for the type.
-func (v *AgeKeyCustomValidator) ValidateUpdate(_ context.Context, _, newObj runtime.Object) (admission.Warnings, error) {
-	ageKey, ok := newObj.(*AgeKey)
-	if !ok {
-		return nil, fmt.Errorf("expected an AgeKey object but got %T", newObj)
-	}
+// ValidateUpdate implements admission.Validator so a webhook will be registered for the type.
+func (v *AgeKeyCustomValidator) ValidateUpdate(_ context.Context, _, ageKey *AgeKey) (admission.Warnings, error) {
 	ageKeyLog.Info("validate update", "name", ageKey.Name)
 	return nil, ageKey.ValidateAgeKey()
 }
 
-// ValidateDelete implements webhook.CustomValidator so a webhook will be registered for the type.
-func (v *AgeKeyCustomValidator) ValidateDelete(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
-	ageKey, ok := obj.(*AgeKey)
-	if !ok {
-		return nil, fmt.Errorf("expected an AgeKey object but got %T", obj)
-	}
+// ValidateDelete implements admission.Validator so a webhook will be registered for the type.
+func (v *AgeKeyCustomValidator) ValidateDelete(_ context.Context, ageKey *AgeKey) (admission.Warnings, error) {
 	ageKeyLog.Info("validate delete", "name", ageKey.Name)
 	return nil, nil
 }

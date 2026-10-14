@@ -61,5 +61,5 @@ type AgeSecretList struct {
 }
 
 func init() {
-	SchemeBuilder.Register(&AgeSecret{}, &AgeSecretList{})
+	SchemeBuilder.Register(knownTypes(&AgeSecret{}, &AgeSecretList{}))
 }

@@ -52,7 +52,7 @@ func (r *AgeSecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	ageSecretInstance := &gitopssecretsnappcloudiov1alpha1.AgeSecret{}
 
-	if err = r.Client.Get(ctx, req.NamespacedName, ageSecretInstance); err != nil {
+	if err = r.Get(ctx, req.NamespacedName, ageSecretInstance); err != nil {
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
@@ -62,7 +62,7 @@ func (r *AgeSecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	goOn, err := k8sutils.HandleAgeSecretFinalizers(ageSecretInstance, r.Client)
 	if err != nil {
 		reqLogger.Info("could not handle AgeSecret finalizers", "namespace", ageSecretInstance.GetNamespace(), "name", ageSecretInstance.GetName(), "error", err)
-		return ctrl.Result{Requeue: true, RequeueAfter: requeueAfterTime}, err
+		return ctrl.Result{RequeueAfter: requeueAfterTime}, err
 	}
 	if !goOn {
 		return ctrl.Result{}, nil
@@ -70,7 +70,7 @@ func (r *AgeSecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	if err = k8sutils.AddAgeSecretFinalizers(ageSecretInstance, r.Client); err != nil {
 		reqLogger.Info("could not add required finalizers to AgeSecret", "namespace", ageSecretInstance.GetNamespace(), "name", ageSecretInstance.GetName(), "error", err)
-		return ctrl.Result{Requeue: true, RequeueAfter: requeueAfterTime}, err
+		return ctrl.Result{RequeueAfter: requeueAfterTime}, err
 	}
 
 	if ageSecretInstance.Spec.Suspend {
@@ -81,7 +81,7 @@ func (r *AgeSecretReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	refAgeKey, errAgeKey := k8sutils.CheckAgeKeyReference(ageSecretInstance, r.Client)
 	if errAgeKey != nil {
 		reqLogger.Info("could not fetch AgeSecret referenced AgeKey", "namespace", ageSecretInstance.GetNamespace(), "name", ageSecretInstance.GetName(), "error", errAgeKey)
-		return ctrl.Result{Requeue: true, RequeueAfter: requeueAfterTime}, errAgeKey
+		return ctrl.Result{RequeueAfter: requeueAfterTime}, errAgeKey
 	}
 
 	decryptedStringData, errDecrypt := k8sutils.DecryptAgeSecret(ageSecretInstance, r.Client, refAgeKey)

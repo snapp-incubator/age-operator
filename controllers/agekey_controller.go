@@ -50,12 +50,12 @@ func (r *AgeKeyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	ageKeyInstance := &gitopssecretsnappcloudiov1alpha1.AgeKey{}
 
-	err = r.Client.Get(ctx, req.NamespacedName, ageKeyInstance)
+	err = r.Get(ctx, req.NamespacedName, ageKeyInstance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{Requeue: true, RequeueAfter: 20 * time.Second}, err
+		return ctrl.Result{RequeueAfter: 20 * time.Second}, err
 	}
 
 	if err = k8sutils.HandleAgeKeyFinalizers(ageKeyInstance, r.Client); err != nil {
